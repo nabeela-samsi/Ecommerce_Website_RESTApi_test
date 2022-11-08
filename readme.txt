@@ -1,0 +1,1 @@
+To see the result of yml file please copy and paste the code at https://editor.swagger.io/ and enjoy the api testing

@@ -1,0 +1,511 @@
+openapi: 3.0.3
+info:
+  title: E-Commerce Website
+  description: |-
+    Welcome to E-Commerce Website api testing
+  version: 1.0.1
+  contact:
+    email: nabeela.samsi@integrify.io
+    name: Nabeela Samsi
+servers:
+  - url: https://dummyjson.com
+tags:
+  - name: Products
+    description: Get product related information from the store
+  - name: Admin
+    description: Add, update or remove the product infromation from the store
+  - name: Users
+    description: Add, update, get or remove user information
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      operationId: getProducts
+      summary: get all product information with or without applying filters
+      parameters:
+        - name: limit
+          in: query
+          description: on providing the limit you can view only those many items
+          schema:
+            type: integer
+        - name: skip
+          in:  query
+          description: on providing the skip you can skip the starting items count
+          schema:
+            type: integer
+        - name: select
+          in: query
+          description: can select which all products fields you want to view, it is comma-separated and no space allowed
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/getProducts'
+                  - $ref: '#/components/schemas/noProductFound'
+                  - $ref: '#/components/schemas/filterProducts'
+  /products/add:
+    post:
+      tags:
+        - Admin
+      operationId: addProduct
+      summary: create the new product(doesnt create from server but stimulates create request)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addProduct'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getProduct'
+        '400':
+          description: 'Error: bad request'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Expected something at a particular line
+  /products/{productid}:
+    get:
+      tags:
+        - Products
+      operationId: getSpecificProduct
+      summary: get specific product information
+      parameters:
+        - name: productid
+          in: path
+          description: ID of the product
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getProduct'
+        '404':
+          description: 'Error: Not found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product with id '{productid}' not found
+    put:
+      tags:
+        - Admin
+      operationId: updateProduct
+      summary: update the product information(doesnt update from server but stimulates update request)
+      parameters:
+        - name: productid
+          in: path
+          description: ID of the product
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: user preferred name
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getProduct'
+        '400':
+          description: 'Error: bad request'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Expected something at a particular line
+        '404':
+          description: 'Error: Not found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product with id '{productid}' not found
+    delete:
+      tags:
+        - Admin
+      operationId: deleteProduct
+      summary: deletes the product information(doesnt remove from server but stimulates delete request)
+      parameters:
+        - name: productid
+          in: path
+          description: Id of the product
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/deleteProductResponse'
+        '404':
+          description: 'Error: Not found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product with id '{productid}' not found
+  /products/search:
+    get:
+      tags:
+        - Products
+      operationId: getProductsBySearch
+      summary: get searched product information
+      parameters:
+        - name: q
+          in: query
+          description: to search the product please enter the name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/getProducts'
+                  - $ref: '#/components/schemas/noProductFound'
+  /products/categories:
+    get:
+      tags:
+        - Products
+      operationId: getAllProductsCategories
+      summary: get all products categories information
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: category1
+  /products/category/{categoryid}:
+    get:
+      tags:
+        - Products
+      operationId: getProductBasedOnCategory
+      parameters:
+        - name: categoryid
+          in: path
+          description: provide category name to get product information belongs to it
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/getProducts'
+                  - $ref: '#/components/schemas/noProductFound'
+  /users/add:
+    post:
+      tags:
+        - Users
+      operationId: addUser
+      summary: create the user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addUpdateUser'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+  /users/{userid}:
+    put:
+      tags:
+        - Users
+      operationId: updateUser
+      summary: update the user information
+      parameters:
+        - name: userid
+          in: path
+          description: id of the user
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addUpdateUser'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+components:
+  schemas:
+    getProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: title of the product
+        description:
+          type: string
+          example: product description
+        price:
+          type: integer
+          example: 500
+        discountPercentage:
+          type: number
+          format: float
+          example: 10.1
+        rating:
+          type: number
+          format: float
+          example: 10.1
+        stock:
+          type: integer
+          example: 12
+        brand:
+          type: string
+          example: brand name
+        category:
+          type: string
+          example: category name
+        thumbnail:
+          type: string
+          example: image1url
+        images:
+          type: array
+          items:
+            example: imageurl1
+    getProducts:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/getProduct'
+        total:
+          type: integer
+          example: 10
+        skip:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 20
+    noProductFound:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            example: null
+        total:
+          type: integer
+          example: 0
+        skip:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 0
+    filterProducts:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              title:
+                type: string
+                example: product title
+              price:
+                type: integer
+                example: 12
+        total:
+          type: integer
+          example: 1000
+        skip:
+          type: integer
+          example: 2
+        limit:
+          type: integer
+          example: 10
+    addProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          example: title of the product
+        description:
+          type: string
+          example: product description
+        price:
+          type: integer
+          example: 500
+        discountPercentage:
+          type: number
+          format: float
+          example: 10.1
+        rating:
+          type: number
+          format: float
+          example: 10.1
+        stock:
+          type: integer
+          example: 12
+        brand:
+          type: string
+          example: brand name
+        category:
+          type: string
+          example: category name
+        thumbnail:
+          type: string
+          example: image1url
+        images:
+          type: array
+          items:
+            example: imageurl1
+    deleteProductResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: product title
+        description:
+          type: string
+          example: product description
+        price:
+          type: integer
+          example: 100
+        discountPercentage:
+          type: number
+          format: float
+          example: 2.2
+        rating:
+          type: number
+          format: float
+          example: 2.2
+        stock:
+          type: integer
+          example: 12
+        brand:
+          type: string
+          example: apple
+        category:
+          type: string
+          example: product category
+        thumbnail:
+          type: string
+          example: image1url
+        images:
+          type: array
+          items:
+            type: string
+            example: imageur12
+        isDeleted:
+          type: boolean
+          example: true
+        deletedOn:
+          type: string
+          example: ISOTime
+    addUpdateUser:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: users firstname
+        lastname:
+          type: string
+          example: users lastname
+        username:
+          type: string
+          example: username
+        age:
+          type: integer
+          example: 12
+        password:
+          type: string
+          example: password123
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: users firstname
+        lastname:
+          type: string
+          example: users lastname
+        username:
+          type: string
+          example: username
+        age:
+          type: integer
+          example: 12
+        password:
+          type: string
+          example: password123

@@ -1,0 +1,620 @@
+openapi: 3.0.3
+info:
+  title: E-Commerce Website
+  description: |-
+    Welcome to E-Commerce Website api testing
+  version: 1.0.1
+  contact:
+    email: nabeela.samsi@integrify.io
+    name: Nabeela Samsi
+servers:
+  - url: https://api.storerestapi.com
+tags:
+  - name: Products
+    description: Get product related information from the store
+  - name: Admin
+    description: Can create update or delete the product
+  - name: Users
+    description: Retrive, add, update or delete the users information
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: return all products information with/without pagination
+      parameters:
+        - in: query
+          name: limit
+          description: product restriction
+          schema:
+            type: integer
+        - in: query
+          name: page
+          description: page restriction
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/product'
+                  - $ref: '#/components/schemas/productLimitation'
+    post:
+      tags:
+        - Admin
+      summary: Add new product to the store
+      operationId: addProduct
+      requestBody:
+        description: Create a new product in a store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addProduct'
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/addProductResponse'
+        '422':
+          description: validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 422
+                  message:
+                    type: string
+                    example: '{field} is required'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: Internal server error
+                  originalError:
+                    type: string
+                    example: Unexpected string in JSON at position 18
+                  errorRef:
+                    type: string
+                    example: error From default
+  /products/{productid}:
+    get:
+      tags:
+        - Products
+      summary: return specific product information successfully
+      parameters:
+        - name: productid
+          in: path
+          description: Id of the product
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/product'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    format: int32
+                    example: 404
+                  message:
+                    type: string
+                    example: "Product is not found!"
+    put:
+      tags:
+        - Admin
+      summary: update the specific product information
+      operationId: updateProduct
+      parameters:
+        - name: productid
+          in: path
+          description: id of the product
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: update a specific product in a store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addProduct'
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateProductResponse'
+        '406':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    format: int32
+                    example: 406
+                  message:
+                    type: string
+                    example: Product is not found!
+    delete:
+      tags:
+        - Admin
+      summary: delete the specific product information
+      operationId: deleteProduct
+      parameters:
+        - name: productid
+          in: path
+          description: id of the product
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 202
+                  message:
+                    type: string
+                    example: Success! Product deleted
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    format: int32
+                    example: 404
+                  message:
+                    type: string
+                    example: "Product is not found!"
+  /categories:
+    get:
+      tags:
+        - Products
+      summary: return all products information with/without pagination
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/categories'
+  /users:
+    get:
+      tags:
+        - Users
+      summary: get all users infromation
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/users'
+    post:
+      tags:
+        - Users
+      summary: create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: username
+                email:
+                  type: string
+                  example: testEmail@domain.com
+                number:
+                  type: string
+                  example: "1234567890"
+                password:
+                  type: string
+                  example: newPassword123
+                password_repeat:
+                  type: string
+                  example: newPassword123
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/addUserResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 422
+                  message:
+                    type: string
+                    example: '{field} is not allowed to be empty'
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: Internal server error
+                  originalError:
+                    type: string
+                    example: 'Unexpected token , in JSON at position {line number}'
+                  errorRef:
+                    type: string
+                    example: error From default
+  /users/{userid}:
+    get:
+      tags:
+        - Users
+      summary: get the specific user information
+      parameters:
+        - name: userid
+          in: path
+          description: Id of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: Not Found
+    put:
+      tags:
+        - Users
+      summary: update the user information
+      parameters:
+        - name: userid
+          in: path
+          description: Id of the user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: username
+                number:
+                  type: string
+                  example: "1234567890"
+                password:
+                  type: string
+                  example: newPassword123
+                password_repeat:
+                  type: string
+                  example: newPassword123
+      responses:
+        '200':
+          description: success
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 422
+                  message:
+                    type: string
+                    example: '{field} is not allowed to be empty'
+components:
+  schemas:
+    product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        title:
+          type: string
+          example: title of the product
+        price:
+          type: number
+          format: float
+          example: 10.97
+        description:
+          type: string
+          example: product description
+        category:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+              example: 1
+            name:
+              type: string
+              example: shoes
+            image:
+              type: string
+              example: image url
+        images:
+          type: array
+          items:
+            type: string
+            example: imageurl1, imageurl2
+    productLimitation:
+      type: object
+      properties:
+        metadata:
+          type: object
+          properties:
+            currentPage:
+              type: integer
+              example: 1
+            totalProducts:
+              type: integer
+              example: 50
+            nextPage:
+              type: integer
+              example: 2
+            totalPage:
+              type: integer
+              example: 6
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/product'
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: success
+    addProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Jwelary'
+        price:
+          type: integer
+          example: 20
+        description:
+          type: string
+          example: 'Exclusive jwelary'
+        category:
+          type: string
+          example: 'jewlary-and-watches'
+    data:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6368c703153cce5b74aefcbb
+        title:
+          type: string
+          example: title name
+        slug:
+          type: string
+          example: slug type
+        price:
+          type: integer
+          example: 20
+        category:
+          type: string
+          example: category name
+        description:
+          type: string
+          example: some description
+        createdBy:
+          type: string
+          example: 612e48e3345dcc333ac6cb2b
+    addProductResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/data'
+        status:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Success! product created
+    updateProductResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/data'
+        status:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Success! product updated
+    categories:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            products:
+              type: array
+              items:
+                type: string
+                example: "61ab420c0f34753bcedfa787"
+            _id:
+              type: string
+              example: 61ab1ca64a0fef3f27dc663f
+            name:
+              type: string
+              example: computer
+            slug:
+              type: string
+              example: computer
+        status:
+            type: string
+            example: 200
+        message:
+            type: string
+            example: success
+    users:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+                example: "user role"
+              _id:
+                type: string
+                example: alphaNumeric ID
+              name:
+                type: string
+                example: username
+              email:
+                type: string
+                example: testEmail@domain.com
+              number:
+                type: string
+                example: "1234567890"
+              password:
+                type: string
+                example: user passsword alphanumeric
+              createdAt:
+                type: string
+                example: "2021-08-30T15:18:41.876Z"
+              updatedAt:
+                type: string
+                example: "2021-08-31T15:18:41.876Z"
+              lastLoginAt:
+                type: string
+                example: "2021-08-31T15:18:41.876Z"
+    user:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            role:
+              type: string
+              example: "user role"
+            _id:
+              type: string
+              example: alphaNumeric ID
+            name:
+              type: string
+              example: username
+            email:
+              type: string
+              example: testEmail@domain.com
+            number:
+              type: string
+              example: "1234567890"
+            password:
+              type: string
+              example: user passsword alphaNumeric
+            createdAt:
+              type: string
+              example: "2021-08-30T15:18:41.876Z"
+            updatedAt:
+              type: string
+              example: "2021-08-31T15:18:41.876Z"
+            lastLoginAt:
+              type: string
+              example: "2021-08-31T15:18:41.876Z"
+    addUserResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: User created
+        access_token:
+          type: string
+          example: alphaNumeric access token generated
+        refresh_token:
+          type: string
+          example: alphaNumeric refresh token generated
